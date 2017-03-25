@@ -23,9 +23,9 @@ namespace BuzzFeed2
             QandA_List.Add(new List<String>());
             QandA_List.Add(new List<String>()); //Creates two sub lists
             QandA_List.Add(new List<String>()); //Creates two sub lists
-
-
             char[] abc_choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray(); // create character alphabet array for the answers later
+            string user_id = "";
+            string users_name = "";
 
 
             SqlConnection connection = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB;AttachDbFilename=C:\Users\zackg\Source\Repos\QuizApp\QuizApp\Database1.mdf;Integrated Security=True"); connection.Open();
@@ -44,11 +44,19 @@ namespace BuzzFeed2
 
                     //get a user name
                     Console.WriteLine("What is your name?");
-                    string userName = Console.ReadLine();
-
-                    command = new SqlCommand($"INSERT INTO Users (Name) VALUES ('{userName}')", connection);
+                    users_name = Console.ReadLine();
+                    command = new SqlCommand($"INSERT INTO Users (Name) VALUES ('{users_name}'); SELECT @@Identity AS ID", connection);
                     command.ExecuteNonQuery();
 
+                    reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        user_id = (reader["id"]).ToString(); // save user_id as variable to be passed to UserAnswers later.
+                    }
+                    Console.WriteLine(user_id);
+                    Console.ReadLine();
+                    reader.Close();
                     //ask what quiz they want to take
                     Console.WriteLine("What quiz would you like to do?");
 
@@ -73,12 +81,6 @@ namespace BuzzFeed2
                     //pass quiz_id to Results table
                     command = new SqlCommand($"INSERT INTO Results (quiz_id) VALUES ('{quizChoice}')", connection);
                     command.ExecuteNonQuery();
-
-
-
-
-
-
                     //ask a question and show choices
                     SqlCommand questionsCommand = new SqlCommand($"SELECT * FROM Questions JOIN Answers on Questions.Id = Answers.Question_id WHERE Quiz_id = {quizChoice}", connection);
                     reader = questionsCommand.ExecuteReader();
@@ -101,12 +103,12 @@ namespace BuzzFeed2
                             QandA_List[2].Add($"{reader["question_id"]}"); // ADD TO LIST question identifier
                             QandA_List[3].Add($"{reader["id"]}"); // ADD TO LIST  answer_id
                             QandA_List[4].Add($"{reader["SortOrder"]}");
-                            //get an answer from user
+                            
 
 
                         }
                     }
-
+                    reader.Close(); // close reader
                     int answer_id = 0;
                     int answer_counter = 0;
                     for (int Question_Index = 0; Question_Index < QandA_List[0].Count; Question_Index++) //for each question
@@ -115,17 +117,13 @@ namespace BuzzFeed2
                         string CurrentQuestion = QandA_List[4][Question_Index]; // letter answer holder
                         Dictionary<string, string> dictionary = new Dictionary<string, string>(); // establishes dictionary
 
-
-
-
-
                         for (int Answer_Index = 0; Answer_Index < QandA_List[1].Count; Answer_Index++) // for each answer LOOP
                         {
                             if (CurrentQuestion == QandA_List[4][Answer_Index]) // if the answer option belongs to the current question
                             {
                                 Console.WriteLine(abc_choices[answer_counter] + "\t" + QandA_List[1][answer_id]); //print answer text
 
-                                dictionary.Add(abc_choices[answer_counter].ToString(), QandA_List[3][answer_id]);//makes dictionary key to match ID with (A, B, C, D)
+                                dictionary.Add(abc_choices[answer_counter].ToString(), QandA_List[3][answer_id]);// Sends answer_ID and associated letter to dictionary
 
                                 answer_id++;
                                 answer_counter++;
@@ -133,23 +131,15 @@ namespace BuzzFeed2
 
                         }
                         Console.Write(" Question " + Question_Index + 1 + " Response/Answer: ");
-                        string user_answer = Console.ReadLine().ToUpper();
-
-                        Console.WriteLine("dictionary of answer: " + dictionary[user_answer]);
+                        string user_answer = dictionary[Console.ReadLine().ToUpper()];
+                        //send answer_id to UserAswers table
+                        Console.WriteLine(user_answer);
                         Console.ReadLine();
-
-
-
-
-
-
+                        //pass user_id and user_answer to UserAnswers table
+                        command = new SqlCommand($"INSERT INTO UserAnswers (user_id, answer_id) VALUES ('{user_id}','{user_answer}')", connection);
+                        command.ExecuteNonQuery();
                         answer_counter = 0;   // reset answer counter
-
-                        //NEED to store answer
                     }
-
-
-
                     Console.WriteLine("End of for loop");
                         Console.ReadLine();
 
