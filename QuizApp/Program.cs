@@ -4,6 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
+// TO DO
+//      display questions in sort order
+//      
+// create new list to store Result_IDs
+// taly up result IDs at end to determine outcome
 
 namespace BuzzFeed2
 {
@@ -12,17 +17,20 @@ namespace BuzzFeed2
         static void Main(string[] args)
         {
 
-         /*   List<string> Question_ID_List = new List<string>();
+         /*   
+          *   ANOTHER POSSIBLE WAY TO STORE THE LISTS
+          *   List<string> Question_ID_List = new List<string>();
             List<string> Question_Text_List = new List<string>();
             List<string> Question_Answers_List = new List<string>();
             List<string> Question_ID_List = new List<string>();*/
 
-            List<List<String>> QandA_List = new List<List<String>>(); //Creates new nested List
-            QandA_List.Add(new List<String>());
-            QandA_List.Add(new List<String>());
-            QandA_List.Add(new List<String>());
-            QandA_List.Add(new List<String>()); //Creates two sub lists
-            QandA_List.Add(new List<String>()); //Creates two sub lists
+            List<List<String>> Quiz_Storage_Lists = new List<List<String>>(); //Creates new nested List
+            Quiz_Storage_Lists.Add(new List<String>());//Creates first sub list [0]
+            Quiz_Storage_Lists.Add(new List<String>());
+            Quiz_Storage_Lists.Add(new List<String>());
+            Quiz_Storage_Lists.Add(new List<String>()); 
+            Quiz_Storage_Lists.Add(new List<String>());
+            Quiz_Storage_Lists.Add(new List<String>()); // creates last sub list [5]
             char[] abc_choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray(); // create character alphabet array for the answers later
             string user_id = "";
             string users_name = "";
@@ -95,43 +103,57 @@ namespace BuzzFeed2
                             {
                                 //store question
                                 oldQuestion = reader["Id"].ToString();
-                                QandA_List[0].Add($"{reader["title"]}"); //ADD TO LIST question being asked
+                                Quiz_Storage_Lists[0].Add($"{reader["title"]}"); //ADD TO LIST question being asked
                             }
                             //Console.WriteLine($"The ID is = {reader["id"]} for {reader["text"]}");
-                            // STORE ALL VARIABLES IN LIST FOR DISPLAY
-                            QandA_List[1].Add($"{reader["text"]}"); //  ADD TO LIST  text for each answer
-                            QandA_List[2].Add($"{reader["question_id"]}"); // ADD TO LIST question identifier
-                            QandA_List[3].Add($"{reader["id"]}"); // ADD TO LIST  answer_id
-                            QandA_List[4].Add($"{reader["SortOrder"]}");
-                            
-
-
+                            // STORE ALL VARIABLES IN LIST FOR DISPLAY LATER
+                            Quiz_Storage_Lists[1].Add($"{reader["text"]}"); //  ADD TO LIST  text for each answer
+                            Quiz_Storage_Lists[2].Add($"{reader["question_id"]}"); // ADD TO LIST question identifier
+                            Quiz_Storage_Lists[3].Add($"{reader["id"]}"); // ADD TO LIST  answer_id
+                            Quiz_Storage_Lists[4].Add($"{reader["SortOrder"]}"); // ADD TO LIST
+                            Quiz_Storage_Lists[5].Add($"{reader["result_id"]}");
                         }
                     }
                     reader.Close(); // close reader
+
+                    //begin question display
                     int answer_id = 0;
                     int answer_counter = 0;
-                    for (int Question_Index = 0; Question_Index < QandA_List[0].Count; Question_Index++) //for each question
+                    //0 = title (writtenn question)
+                    //1 = text (answer)
+                    //2 = question_id (answer)
+                    //3 = id (answer_id)
+                    //4 = SortOrder (answers)
+                    //5 = result_id (answers)
+
+
+                    for (int Listed_Question = 0; Listed_Question < Quiz_Storage_Lists[0].Count; Listed_Question++) //for each question
                     {
-                        Console.WriteLine(QandA_List[0][Question_Index]); // print question.
-                        string CurrentQuestion = QandA_List[4][Question_Index]; // letter answer holder
-                        Dictionary<string, string> dictionary = new Dictionary<string, string>(); // establishes dictionary
 
-                        for (int Answer_Index = 0; Answer_Index < QandA_List[1].Count; Answer_Index++) // for each answer LOOP
+
+                        // this is where I can order questions by sort order
+
+                        Console.WriteLine(Quiz_Storage_Lists[0][Listed_Question]); // print question starting at index 0.
+                        string CurrentQuestion = Quiz_Storage_Lists[4][Listed_Question]; // abc letter answer holder
+                        Dictionary<string, string> answer_key = new Dictionary<string, string>(); // establishes dictionary to be used as hash
+
+                        for (int Answer_Index = 0; Answer_Index < Quiz_Storage_Lists[1].Count; Answer_Index++) // for each answer in ....
                         {
-                            if (CurrentQuestion == QandA_List[4][Answer_Index]) // if the answer option belongs to the current question
+                            if (CurrentQuestion == Quiz_Storage_Lists[4][Answer_Index]) // if the answer option belongs to the current question
                             {
-                                Console.WriteLine(abc_choices[answer_counter] + "\t" + QandA_List[1][answer_id]); //print answer text
+                                Console.WriteLine(abc_choices[answer_counter] + "\t" + Quiz_Storage_Lists[1][answer_id]); //print answer text
 
-                                dictionary.Add(abc_choices[answer_counter].ToString(), QandA_List[3][answer_id]);// Sends answer_ID and associated letter to dictionary
+                                answer_key.Add(abc_choices[answer_counter].ToString(), Quiz_Storage_Lists[3][answer_id]);// Sends answer_ID and associated letter to dictionary
 
                                 answer_id++;
                                 answer_counter++;
                             }
 
                         }
-                        Console.Write(" Question " + Question_Index + 1 + " Response/Answer: ");
-                        string user_answer = dictionary[Console.ReadLine().ToUpper()];
+                        Console.Write(" Question " + Listed_Question + 1 + " Response/Answer: ");
+                        string user_answer = answer_key[Console.ReadLine().ToUpper()];
+                        ///////////////   int item = Quiz_Storage_Lists.Find(x => x > 2);
+
                         //send answer_id to UserAswers table
                         Console.WriteLine(user_answer);
                         Console.ReadLine();
