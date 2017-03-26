@@ -7,30 +7,43 @@ using System.Data.SqlClient;
 // TO DO
 //      display questions in sort order
 //      
-// create new list to store Result_IDs
 // taly up result IDs at end to determine outcome
 
 namespace BuzzFeed2
 {
+   /* 
+    * POSSIBLE CLASS TO USE
+    * class Questions
+    {
+        public int Questions_SortOrder { get; set; }
+        public string Questions_Title { get; set; }
+        public string Answers_Text { get; set; }
+        public string Questions_Question_ID { get; set; }
+        public string Answers_Answer_ID { get; set; }
+        public string Answers_Result_ID { get; set; }
+    } */
+
+
     class Program
     {
         static void Main(string[] args)
         {
 
-         /*   
-          *   ANOTHER POSSIBLE WAY TO STORE THE LISTS
-          *   List<string> Question_ID_List = new List<string>();
-            List<string> Question_Text_List = new List<string>();
-            List<string> Question_Answers_List = new List<string>();
-            List<string> Question_ID_List = new List<string>();*/
 
-            List<List<String>> Quiz_Storage_Lists = new List<List<String>>(); //Creates new nested List
-            Quiz_Storage_Lists.Add(new List<String>());//Creates first sub list [0]
-            Quiz_Storage_Lists.Add(new List<String>());
-            Quiz_Storage_Lists.Add(new List<String>());
-            Quiz_Storage_Lists.Add(new List<String>()); 
-            Quiz_Storage_Lists.Add(new List<String>());
-            Quiz_Storage_Lists.Add(new List<String>()); // creates last sub list [5]
+
+
+
+
+
+            List<string>Questions_Title_List = new List<string>();
+            List<string>Answers_Text_List = new List<string>();
+            List<string>Questions_Question_ID_List = new List<string>();
+            List<string>Answers_Answer_ID_List = new List<string>();
+            List<int>Questions_SortOrder_List = new List<int>();
+            List<string>Answers_Result_ID_List = new List<string>();
+
+            List<string>Results_Tally = new List<string>();
+
             char[] abc_choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray(); // create character alphabet array for the answers later
             string user_id = "";
             string users_name = "";
@@ -62,11 +75,10 @@ namespace BuzzFeed2
                         reader.Read();
                         user_id = (reader["id"]).ToString(); // save user_id as variable to be passed to UserAnswers later.
                     }
-                    Console.WriteLine(user_id);
-                    Console.ReadLine();
                     reader.Close();
+                          Console.Clear();
                     //ask what quiz they want to take
-                    Console.WriteLine("What quiz would you like to do?");
+                    Console.WriteLine($"Thanks, {users_name}!\nPlease enter the number of the quiz would you like to try.");
 
                     command = new SqlCommand("SELECT * FROM Quiz", connection);
                     reader = command.ExecuteReader();
@@ -103,15 +115,15 @@ namespace BuzzFeed2
                             {
                                 //store question
                                 oldQuestion = reader["Id"].ToString();
-                                Quiz_Storage_Lists[0].Add($"{reader["title"]}"); //ADD TO LIST question being asked
+                                Questions_Title_List.Add($"{reader["title"]}"); //ADD TO LIST question being asked
+                                Questions_SortOrder_List.Add(Convert.ToInt16($"{reader["SortOrder"]}")); // ADD TO LIST
+
                             }
-                            //Console.WriteLine($"The ID is = {reader["id"]} for {reader["text"]}");
                             // STORE ALL VARIABLES IN LIST FOR DISPLAY LATER
-                            Quiz_Storage_Lists[1].Add($"{reader["text"]}"); //  ADD TO LIST  text for each answer
-                            Quiz_Storage_Lists[2].Add($"{reader["question_id"]}"); // ADD TO LIST question identifier
-                            Quiz_Storage_Lists[3].Add($"{reader["id"]}"); // ADD TO LIST  answer_id
-                            Quiz_Storage_Lists[4].Add($"{reader["SortOrder"]}"); // ADD TO LIST
-                            Quiz_Storage_Lists[5].Add($"{reader["result_id"]}");
+                            Answers_Text_List.Add($"{reader["text"]}"); //  ADD TO LIST  text for each answer
+                            Questions_Question_ID_List.Add($"{reader["question_id"]}"); // ADD TO LIST question identifier
+                            Answers_Answer_ID_List.Add($"{reader["id"]}"); // ADD TO LIST  answer_id
+                            Answers_Result_ID_List.Add($"{reader["result_id"]}");
                         }
                     }
                     reader.Close(); // close reader
@@ -127,23 +139,23 @@ namespace BuzzFeed2
                     //5 = result_id (answers)
 
 
-                    for (int Listed_Question = 0; Listed_Question < Quiz_Storage_Lists[0].Count; Listed_Question++) //for each question
+                    for (int Listed_Question = 0; Listed_Question < Questions_Title_List.Count; Listed_Question++) //for each question
                     {
 
 
                         // this is where I can order questions by sort order
 
-                        Console.WriteLine(Quiz_Storage_Lists[0][Listed_Question]); // print question starting at index 0.
-                        string CurrentQuestion = Quiz_Storage_Lists[4][Listed_Question]; // abc letter answer holder
+                        Console.WriteLine(Questions_Title_List[Listed_Question]); // print question starting at index 0.
+                        string CurrentQuestion = Questions_Question_ID_List[Listed_Question]; // abc letter answer holder
                         Dictionary<string, string> answer_key = new Dictionary<string, string>(); // establishes dictionary to be used as hash
 
-                        for (int Answer_Index = 0; Answer_Index < Quiz_Storage_Lists[1].Count; Answer_Index++) // for each answer in ....
+                        for (int Answer_Index = 0; Answer_Index < Answers_Text_List.Count; Answer_Index++) // for each answer in ....
                         {
-                            if (CurrentQuestion == Quiz_Storage_Lists[4][Answer_Index]) // if the answer option belongs to the current question
+                            if (CurrentQuestion == Questions_Question_ID_List[Answer_Index]) // if the answer option belongs to the current question
                             {
-                                Console.WriteLine(abc_choices[answer_counter] + "\t" + Quiz_Storage_Lists[1][answer_id]); //print answer text
+                                Console.WriteLine(abc_choices[answer_counter] + "\t" + Answers_Text_List[answer_id]); //print answer text
 
-                                answer_key.Add(abc_choices[answer_counter].ToString(), Quiz_Storage_Lists[3][answer_id]);// Sends answer_ID and associated letter to dictionary
+                                answer_key.Add(abc_choices[answer_counter].ToString(), Answers_Answer_ID_List[answer_id]);// Sends answer_ID and associated letter to dictionary
 
                                 answer_id++;
                                 answer_counter++;
@@ -151,14 +163,14 @@ namespace BuzzFeed2
 
                         }
                         Console.Write(" Question " + Listed_Question + 1 + " Response/Answer: ");
-                        string user_answer = answer_key[Console.ReadLine().ToUpper()];
-                        ///////////////   int item = Quiz_Storage_Lists.Find(x => x > 2);
+                        string user_answer_id = answer_key[Console.ReadLine().ToUpper()];   // convert typed letter answer to associated answer_ID.
 
-                        //send answer_id to UserAswers table
-                        Console.WriteLine(user_answer);
-                        Console.ReadLine();
-                        //pass user_id and user_answer to UserAnswers table
-                        command = new SqlCommand($"INSERT INTO UserAnswers (user_id, answer_id) VALUES ('{user_id}','{user_answer}')", connection);
+
+                        int index = Answers_Answer_ID_List.IndexOf(user_answer_id); // get index position of answer
+                        Results_Tally.Add($"{Answers_Result_ID_List[index]}"); // Save result_ID from same index position
+
+                        //pass user_id and answer_id to UserAnswers table
+                        command = new SqlCommand($"INSERT INTO UserAnswers (user_id, answer_id) VALUES ('{user_id}','{user_answer_id}')", connection);
                         command.ExecuteNonQuery();
                         answer_counter = 0;   // reset answer counter
                     }
@@ -169,6 +181,15 @@ namespace BuzzFeed2
 
 
                     //tally result of answers
+                    // NEED TO FIGURE OUT WAY TO SORT BY result_id COUNT, Match that result_id to Results table and display title and text.
+                    var results = Results_Tally.GroupBy(i => i);
+                    foreach (var result_id in results)
+                    {
+                        Console.WriteLine("{0} {1}", result_id.Key, result_id.Count());
+                    }
+
+
+
 
                     //give user the result
 
