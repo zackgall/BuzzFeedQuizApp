@@ -35,16 +35,7 @@ namespace BuzzFeed2
 
 
 
-            List<string>Questions_Title_List = new List<string>();
-            List<string>Answers_Text_List = new List<string>();
-            List<string>Questions_Question_ID_List = new List<string>();
-            List<string>Answers_Answer_ID_List = new List<string>();
-            List<int>Questions_SortOrder_List = new List<int>();
-            List<string>Answers_Result_ID_List = new List<string>();
 
-            List<string>Results_Tally = new List<string>();
-
-            char[] abc_choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray(); // create character alphabet array for the answers later
             string user_id = "";
             string users_name = "";
 
@@ -62,6 +53,17 @@ namespace BuzzFeed2
 
                 if (answer == "Q")
                 {
+                    //LISTS to store info for selected quiz.
+                    List<string> Questions_Title_List = new List<string>();
+                    List<string> Answers_Text_List = new List<string>();
+                    List<string> Questions_Question_ID_List = new List<string>();
+                    List<string> Answers_Answer_ID_List = new List<string>();
+                    List<int> Questions_SortOrder_List = new List<int>();
+                    List<string> Answers_Result_ID_List = new List<string>();
+                    List<string> Results_Tally = new List<string>();
+                    char[] abc_choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray(); // create character alphabet array for the answers later
+
+
 
                     //get a user name
                     Console.WriteLine("What is your name?");
@@ -185,7 +187,7 @@ namespace BuzzFeed2
                     var results = Results_Tally.GroupBy(i => i);
                     foreach (var result_id in results)
                     {
-                        Console.WriteLine("{0} {1}", result_id.Key, result_id.Count());
+                        Console.WriteLine("Result ID: {0} Tally: {1}", result_id.Key, result_id.Count());
                     }
 
 
