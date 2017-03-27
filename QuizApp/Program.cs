@@ -146,7 +146,7 @@ namespace BuzzFeed2
 
 
                         // this is where I can order questions by sort order
-
+                        Console.Clear();
                         Console.WriteLine(Questions_Title_List[Listed_Question]); // print question starting at index 0.
                         string CurrentQuestion = Questions_Question_ID_List[Listed_Question]; // abc letter answer holder
                         Dictionary<string, string> answer_key = new Dictionary<string, string>(); // establishes dictionary to be used as hash
@@ -167,7 +167,6 @@ namespace BuzzFeed2
                         Console.Write(" Question " + Listed_Question + 1 + " Response/Answer: ");
                         string user_answer_id = answer_key[Console.ReadLine().ToUpper()];   // convert typed letter answer to associated answer_ID.
 
-
                         int index = Answers_Answer_ID_List.IndexOf(user_answer_id); // get index position of answer
                         Results_Tally.Add($"{Answers_Result_ID_List[index]}"); // Save result_ID from same index position
 
@@ -176,24 +175,25 @@ namespace BuzzFeed2
                         command.ExecuteNonQuery();
                         answer_counter = 0;   // reset answer counter
                     }
-                    Console.WriteLine("End of for loop");
-                        Console.ReadLine();
-
-
 
 
                     //tally result of answers
                     // NEED TO FIGURE OUT WAY TO SORT BY result_id COUNT, Match that result_id to Results table and display title and text.
-                    var results = Results_Tally.GroupBy(i => i);
-                    foreach (var result_id in results)
-                    {
-                        Console.WriteLine("Result ID: {0} Tally: {1}", result_id.Key, result_id.Count());
-                    }
-
-
+                    var result_id_leader = Results_Tally.GroupBy(i => i).OrderByDescending(x => x.Count()).First().Key;
 
 
                     //give user the result
+                    Console.Clear();
+                    SqlCommand display_results = new SqlCommand($"SELECT * FROM Results WHERE ID = {result_id_leader}", connection);
+                    reader = display_results.ExecuteReader();
+
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            Console.WriteLine($"You are a {reader["title"]}!\n\n{reader["text"]}");
+                        }
+                    }
 
                     reader.Close();
                 }//END OF Q
