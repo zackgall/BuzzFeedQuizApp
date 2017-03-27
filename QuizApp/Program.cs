@@ -4,10 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
-// TO DO
-//      display questions in sort order
-//      
-// taly up result IDs at end to determine outcome
+
 
 namespace BuzzFeed2
 {
@@ -28,19 +25,12 @@ namespace BuzzFeed2
     {
         static void Main(string[] args)
         {
-
-
-
-
-
-
-
-
             string user_id = "";
             string users_name = "";
 
 
-            SqlConnection connection = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB;AttachDbFilename=C:\Users\zackg\Source\Repos\QuizApp\QuizApp\Database1.mdf;Integrated Security=True"); connection.Open();
+            SqlConnection connection = new SqlConnection(@"Data Source=10.1.10.148;Initial Catalog=Buzzfeed-Session3;Persist Security Info=True;User ID=session3;Password=12345");
+            connection.Open();
 
             bool keepPlaying = true;
             while (keepPlaying == true)
@@ -133,17 +123,10 @@ namespace BuzzFeed2
                     //begin question display
                     int answer_id = 0;
                     int answer_counter = 0;
-                    //0 = title (writtenn question)
-                    //1 = text (answer)
-                    //2 = question_id (answer)
-                    //3 = id (answer_id)
-                    //4 = SortOrder (answers)
-                    //5 = result_id (answers)
 
 
                     for (int Listed_Question = 0; Listed_Question < Questions_Title_List.Count; Listed_Question++) //for each question
                     {
-
 
                         // this is where I can order questions by sort order
                         Console.Clear();
@@ -164,7 +147,7 @@ namespace BuzzFeed2
                             }
 
                         }
-                        Console.Write(" Question " + Listed_Question + 1 + " Response/Answer: ");
+                        Console.Write("Answer: ");
                         string user_answer_id = answer_key[Console.ReadLine().ToUpper()];   // convert typed letter answer to associated answer_ID.
 
                         int index = Answers_Answer_ID_List.IndexOf(user_answer_id); // get index position of answer
