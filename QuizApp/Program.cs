@@ -8,18 +8,6 @@ using System.Data.SqlClient;
 
 namespace BuzzFeed2
 {
-   /* 
-    * POSSIBLE CLASS TO USE
-    * class Questions
-    {
-        public int Questions_SortOrder { get; set; }
-        public string Questions_Title { get; set; }
-        public string Answers_Text { get; set; }
-        public string Questions_Question_ID { get; set; }
-        public string Answers_Answer_ID { get; set; }
-        public string Answers_Result_ID { get; set; }
-    } */
-
 
     class Program
     {
@@ -29,8 +17,11 @@ namespace BuzzFeed2
             string users_name = "";
 
 
-            SqlConnection connection = new SqlConnection(@"Data Source=10.1.10.148;Initial Catalog=Buzzfeed-Session3;Persist Security Info=True;User ID=session3;Password=12345");
+            SqlConnection connection = new SqlConnection(@"Data Source=(LocalDb)\MSSQLLocalDB;AttachDbFilename=C:\Users\zackg\Source\Repos\QuizApp\QuizApp\Database1.mdf;Initial Catalog=Buzzfeed-Session3;Persist Security Info=True");
             connection.Open();
+
+
+
 
             bool keepPlaying = true;
             while (keepPlaying == true)
@@ -75,24 +66,18 @@ namespace BuzzFeed2
                     command = new SqlCommand("SELECT * FROM Quiz", connection);
                     reader = command.ExecuteReader();
 
-
-                    //int quizCounter = 1;
-                    //
                     if (reader.HasRows)
                     {
                         while (reader.Read())
                         {
                            Console.WriteLine($"{reader["ID"]} - {reader["name"]}");
-                            //quizCounter++;
                         }
                     }
                     Console.Write("Type in the Quiz number:  ");
                     int quizChoice = Convert.ToInt32(Console.ReadLine());
 
                     reader.Close();
-                    //pass quiz_id to Results table
-                    command = new SqlCommand($"INSERT INTO Results (quiz_id) VALUES ('{quizChoice}')", connection);
-                    command.ExecuteNonQuery();
+
                     //ask a question and show choices
                     SqlCommand questionsCommand = new SqlCommand($"SELECT * FROM Questions JOIN Answers on Questions.Id = Answers.Question_id WHERE Quiz_id = {quizChoice}", connection);
                     reader = questionsCommand.ExecuteReader();
